@@ -372,7 +372,7 @@
 
             socket.on('new_message', function(data) {
                 const isOwnMessage = data.user_name === currentUserName;
-                addMessage(data.user_name, data.content, data.timestamp, isOwnMessage);
+                addMessage(data.user_name, data.content, data.timestamp, isOwnMessage , "/static/" + data.image);
             });
 
             $(document).on('keydown', function(e) {

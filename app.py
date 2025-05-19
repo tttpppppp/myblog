@@ -1,10 +1,7 @@
 import uuid
-from _pydatetime import timedelta
-from datetime import date, datetime, UTC
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta, UTC
 from flask_apscheduler import scheduler, APScheduler
 from flask_socketio import SocketIO
-from pyexpat.errors import messages
 from pytz import timezone
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
@@ -367,6 +364,7 @@ def kholuutru():
         else:
             post.remaining_seconds = 0
     return render_template("store.html", posts=posts)
+
 @app.route('/restore_post', methods=['POST'])
 def restore_post():
     data = request.get_json()
@@ -396,21 +394,19 @@ def send_message():
     content = data.get('data')
     user = session.get('user')
     username = user.get('username') if user else 'Unknown'
-
+    image = user.get('image_url') if user else 'Unknown'
     message = Message(content=content, user_id=user['id'])
     db.session.add(message)
     db.session.commit()
 
     msg_data = {
         'user_name': username,
+        "image" :image,
         'content': content,
         'timestamp': message.timestamp.strftime('%Y-%m-%d %H:%M:%S')
     }
     socketio.emit('new_message', msg_data)
     return jsonify(msg_data)
-
-
-
 @app.route('/messages', methods=['GET'])
 def get_messages():
     messages = Message.query.order_by(Message.timestamp.asc()).all()
