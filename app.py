@@ -1,6 +1,6 @@
 import uuid
 from datetime import date, datetime, timedelta, UTC
-from flask_apscheduler import scheduler, APScheduler
+from flask_apscheduler import APScheduler
 from flask_socketio import SocketIO
 from pytz import timezone
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
