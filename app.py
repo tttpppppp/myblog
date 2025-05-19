@@ -413,7 +413,7 @@ def get_messages():
     result = []
     for msg in messages:
         result.append({
-            'user_name' : 'user_name': msg.user.name if msg.user else 'Unknown',
+            'user_name' :  msg.user.name if msg.user else 'Unknown',
             'content': msg.content,
             "image" : msg.user.avatar_url,
             'timestamp': msg.timestamp.strftime('%Y-%m-%d %H:%M:%S')
