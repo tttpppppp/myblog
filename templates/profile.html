@@ -74,6 +74,7 @@
                                         {% endif %}
                                     </span>
                                 </span>
+                                {% if session['user']['id'] == user.id %}
                                 <div class="relative">
                                     <button class="dropdown-toggle focus:outline-none" aria-label="Post options">
                                         <i class="fa-solid fa-ellipsis"></i>
@@ -81,9 +82,10 @@
                                     <div class="dropdown-menu hidden absolute right-0 mt-2 w-32 bg-white border rounded-lg shadow-lg z-10">
                                         <button data-postid="{{ i.id }}" class="editPost block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Chỉnh sửa</button>
                                         <button data-postid="{{ i.id }}" class="deletePost block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Xóa bài viết</button>
-
                                     </div>
                                 </div>
+                                {% endif %}
+
                             </div>
                             <a href="/baiviet/{{ i.slug }}" class="flex flex-col flex-1">
                                 <img src="{{ url_for('static', filename=i.thumbnail_url) }}"
