@@ -152,7 +152,7 @@ def register():
         email = request.form.get('email')
         mobile = request.form.get('mobile')
         password = request.form.get('password')
-        image = "uploads/avt.jpg"
+        image = "images/avt.jpg"
         hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
         user = User(name=name, email=email, password=hashed_password, mobile=mobile , avatar_url=image)
         db.session.add(user)
