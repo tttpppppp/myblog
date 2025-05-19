@@ -412,12 +412,13 @@ def get_messages():
     messages = Message.query.order_by(Message.timestamp.asc()).all()
     result = []
     for msg in messages:
-        result.append({
-            'user_name' :  msg.user.name if msg.user else 'Unknown',
-            'content': msg.content,
-            "image" : msg.user.avatar_url,
-            'timestamp': msg.timestamp.strftime('%Y-%m-%d %H:%M:%S')
-        })
+        if msg.user:
+            result.append({
+                'user_name' :  msg.user.name,
+                'content': msg.content,
+                "image" : msg.user.avatar_url,
+                'timestamp': msg.timestamp.strftime('%Y-%m-%d %H:%M:%S')
+            })
     return jsonify(result)
 
 @app.errorhandler(404)
