@@ -484,6 +484,6 @@ if __name__ == '__main__':
         if not path.exists('blog.db'):
             db.create_all()
             print("Database Created")
-    socketio.run(app, debug=True)
+    port = int(os.environ.get('PORT', 5000))
     scheduler.add_job(id='Cleanup posts', func=hard_delete_old_posts, trigger='interval', days=1)
     socketio.run(app, debug=True, host='0.0.0.0', port=port)
