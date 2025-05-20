@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Đăng Ký</title>
+    <link rel="icon" href="{{ url_for('static', filename='/images/logoicon.png') }}" type="image/x-icon" />
     <script src="https://cdn.tailwindcss.com"></script>
     <link
             href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
@@ -51,7 +52,7 @@
         <h2 class="text-xl font-semibold text-gray-900">Tạo tài khoản mới</h2>
         <p class="text-sm text-gray-600">
             Đã có tài khoản?
-            <a href="#" class="text-indigo-600 hover:text-indigo-500">Đăng nhập.</a>
+            <a href="/login" class="text-indigo-600 hover:text-indigo-500">Đăng nhập.</a>
         </p>
 
         <form class="space-y-4" action="/register" method="POST">

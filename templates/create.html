@@ -3,116 +3,104 @@
 {% block title %}Tạo bài viết{% endblock %}
 
 {% block content %}
-    <main class="container mx-auto max-w-4xl px-4 py-6">
-        <div class="editor-container bg-white shadow-md p-6 rounded-lg">
-            <h2 class="text-2xl font-bold text-gray-500 mb-6">Tạo Bài Viết Mới</h2>
-            <form id="post-form" method="POST" enctype="multipart/form-data" action="/taobaiviet">
-                <div class="mb-4">
-                    <label
-                            for="post-title"
-                            class="block text-sm font-medium text-gray-700 mb-2"
-                    >
-                        Tiêu đề bài viết
-                    </label>
+    <main class="container mx-auto max-w-3xl px-6 py-10 bg-gray-50 min-h-screen flex items-center justify-center">
+        <div class="bg-white shadow-xl rounded-2xl p-8 w-full">
+            <h2 class="text-3xl font-extrabold text-gray-800 mb-8 border-b pb-4">Tạo Bài Viết Mới</h2>
+            <form id="post-form" method="POST" enctype="multipart/form-data" action="/taobaiviet" class="space-y-6">
+
+                <!-- Tiêu đề bài viết -->
+                <div>
+                    <label for="post-title" class="block text-gray-700 font-semibold mb-2">Tiêu đề bài viết</label>
                     <input
                             type="text"
                             id="post-title"
                             name="title"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white"
                             placeholder="Nhập tiêu đề bài viết..."
                             required
+                            class="w-full px-5 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
                     />
                 </div>
-                <div class="mb-4">
-                    <label
-                            for="post-category"
-                            class="block text-sm font-medium text-gray-700 mb-2"
-                    >
-                        Danh mục
-                    </label>
-                    <!-- Checkbox -->
-                    {% for category in categories %}
-                        <label>
-                            <input type="checkbox" name="category_ids" value="{{ category.id }}">
-                            {{ category.name }}
-                        </label><br>
-                    {% endfor %}
 
-                    <label
-                            for="post-category"
-                            class="block text-sm font-medium text-gray-700 mb-2"
-                    >
-                        Trạng thái bài viết
-                    </label>
+                <!-- Danh mục -->
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-2">Danh mục</label>
+                    <div class="grid grid-cols-2 gap-3 max-h-40 overflow-y-auto border border-gray-200 rounded-lg p-3 bg-gray-50">
+                        {% for category in categories %}
+                            <label class="flex items-center space-x-2 cursor-pointer text-gray-700 hover:text-blue-600">
+                                <input type="checkbox" name="category_ids" value="{{ category.id }}" class="form-checkbox h-5 w-5 text-blue-600" />
+                                <span>{{ category.name }}</span>
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Trạng thái bài viết -->
+                <div>
+                    <label for="post-status" class="block text-gray-700 font-semibold mb-2">Trạng thái bài viết</label>
                     <select
-                            id="post-category"
+                            id="post-status"
                             name="status"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white"
                             required
-                    >    <option value="published">Công khai</option>
+                            class="w-full px-5 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition bg-white"
+                    >
+                        <option value="published">Công khai</option>
                         <option value="draft">Nháp</option>
                         <option value="archived">Lưu trữ</option>
                     </select>
                 </div>
-                <div class="mb-4">
-                    <label
-                            for="post-image"
-                            class="block text-sm font-medium text-gray-700 mb-2"
-                    >
-                        Hình ảnh bài viết
-                    </label>
+
+                <!-- Hình ảnh bài viết -->
+                <div>
+                    <label for="post-image" class="block text-gray-700 font-semibold mb-2">Hình ảnh bài viết</label>
                     <input
                             type="file"
                             id="post-image"
                             name="image"
                             accept="image/*"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white"
+                            class="w-full text-gray-600"
                     />
                 </div>
-                <div class="mb-4">
-                    <label
-                            for="post-content"
-                            class="block text-sm font-medium text-gray-700 mb-2"
-                    >
-                        Mô tả
-                    </label>
+
+                <!-- Mô tả -->
+                <div>
+                    <label for="description" class="block text-gray-700 font-semibold mb-2">Mô tả</label>
                     <textarea
+                            id="description"
                             name="description"
                             placeholder="Mô tả bài viết"
-                            class="w-full bg-white text-black px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            rows="3"
+                            class="w-full px-5 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none transition bg-white text-gray-800"
                     ></textarea>
                 </div>
-                <div class="mb-4">
-                    <label for="tags" class="block text-gray-700 font-medium mb-2">Tags (ngăn cách bằng dấu phẩy)</label>
-                    <input type="text" id="tags" name="tags"
-                           placeholder="ví dụ: công nghệ, AI, học lập trình"
-                           class="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring focus:border-blue-300" />
+
+                <!-- Tags -->
+                <div>
+                    <label for="tags" class="block text-gray-700 font-semibold mb-2">Tags (ngăn cách bằng dấu phẩy)</label>
+                    <input
+                            type="text"
+                            id="tags"
+                            name="tags"
+                            placeholder="ví dụ: công nghệ, AI, học lập trình"
+                            class="w-full px-5 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                    />
                 </div>
 
-                <div class="mb-4">
-                    <label
-                            for="post-content"
-                            class="block text-sm font-medium text-gray-700 mb-2"
-                    >
-                        Nội dung bài viết
-                    </label>
+                <!-- Nội dung bài viết -->
+                <div>
+                    <label for="post-content" class="block text-gray-700 font-semibold mb-2">Nội dung bài viết</label>
                     <textarea
                             id="post-content"
                             name="content"
-                            class="w-full bg-white text-black px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            rows="6"
+                            class="w-full px-5 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y transition bg-white text-gray-800"
                     ></textarea>
                 </div>
+
+                <!-- Buttons -->
                 <div class="flex justify-end space-x-4">
                     <button
                             type="submit"
-                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-full hover:bg-gray-400 transition duration-200"
-                            onclick="saveDraft()"
-                    >
-                        Lưu Nháp
-                    </button>
-                    <button
-                            type="submit"
-                            class="px-4 py-2 bg-blue-700 text-white rounded-full hover:bg-blue-800 transition duration-200"
+                            class="px-6 py-3 bg-blue-600 text-white rounded-full font-semibold hover:bg-blue-700 transition"
                     >
                         Đăng Bài
                     </button>
@@ -120,4 +108,5 @@
             </form>
         </div>
     </main>
+
 {% endblock %}

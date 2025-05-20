@@ -3,7 +3,7 @@ from datetime import date, datetime, timedelta, UTC
 from flask_apscheduler import APScheduler
 from flask_socketio import SocketIO
 from pytz import timezone
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, abort
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import secure_filename
 import os
@@ -277,7 +277,8 @@ def createPost():
 @app.route("/baiviet/edit/<string:slug>", methods=['GET', 'POST'])
 def editPost(slug):
     post = Post.query.filter_by(slug=slug).first_or_404()
-
+    if session.get('user') is None or session['user']['id'] != post.user_id:
+        abort(403)
     if request.method == 'GET':
         selected_category_ids = [pc.category_id for pc in post.post_categories]
         tag_string = ", ".join([tag.name for tag in post.tags])
@@ -385,11 +386,13 @@ def addComment():
 def deletePost():
     data = request.get_json()
     post_id = data.get('post_id')
+    post = Post.query.get(post_id)
     if not post_id:
         return jsonify({'error': 'post_id is required'}), 400
-    post = Post.query.get(post_id)
     if not post:
         return jsonify({'error': 'Post not found'}), 404
+    if session.get('user') is None or session['user']['id'] != post.user_id:
+        abort(403)
     post.deleted_at = datetime.utcnow()
     db.session.commit()
     return jsonify({'message': f'Post {post_id} deleted (soft delete)'}), 200
@@ -479,11 +482,16 @@ def get_messages():
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('PageNotFound.html'), 404
+@app.errorhandler(403)
+def forbidden_error(error):
+    return render_template("forbidden.html"), 403
 if __name__ == '__main__':
     with app.app_context():
         if not path.exists('blog.db'):
             db.create_all()
             print("Database Created")
-    port = int(os.environ.get('PORT', 5000))
+    # socketio.run(app, debug=True)
     scheduler.add_job(id='Cleanup posts', func=hard_delete_old_posts, trigger='interval', days=1)
+
+    port = int(os.environ.get('PORT', 5000))
     socketio.run(app, debug=True, host='0.0.0.0', port=port)
