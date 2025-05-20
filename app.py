@@ -177,7 +177,13 @@ def hub():
             Post.deleted_at == None
         )
     ).order_by(Post.created_at.desc()).all()
-    return render_template("index.html" , posts=posts)
+    postsView = Post.query.filter(
+        and_(
+            Post.status == 'published',
+            Post.deleted_at == None
+        )
+    ).order_by(Post.view_count.desc()).limit(3).all()
+    return render_template("index.html" , posts=posts , postsView=postsView)
 
 @app.route('/danhmuc/<string:slug>')
 def category(slug):
@@ -268,6 +274,54 @@ def createPost():
 
         db.session.commit()
         return redirect('/blogger/' + str(user_id))
+@app.route("/baiviet/edit/<string:slug>", methods=['GET', 'POST'])
+def editPost(slug):
+    post = Post.query.filter_by(slug=slug).first_or_404()
+
+    if request.method == 'GET':
+        selected_category_ids = [pc.category_id for pc in post.post_categories]
+        tag_string = ", ".join([tag.name for tag in post.tags])
+        categories = Category.query.all()
+        return render_template("baivietedit.html", post=post,
+                               selected_category_ids=selected_category_ids,
+                               tag_string=tag_string,
+                               categories=categories)
+
+    # POST
+    title = request.form.get('title')
+    post.title = title
+    post.slug = slugify(title)
+    post.content = request.form.get('content')
+    post.status = request.form.get('status')
+    post.description = request.form.get('description')
+
+    # Cập nhật categories
+    category_ids = request.form.getlist('category_ids')
+    post.post_categories.clear()
+    for cid in category_ids:
+        post.post_categories.append(PostCategory(category_id=int(cid)))
+
+    # Cập nhật tags
+    tags = request.form.get('tags', '')
+    tag_list = [t.strip().lower() for t in tags.split(',') if t.strip()]
+    post.tags.clear()
+    for tag_name in tag_list:
+        tag = Tag.query.filter_by(name=tag_name).first()
+        if not tag:
+            tag = Tag(name=tag_name)
+            db.session.add(tag)
+        post.tags.append(tag)
+
+    # Cập nhật ảnh nếu có
+    image = request.files.get('image')
+    if image and image.filename != '':
+        filename = secure_filename(image.filename)
+        filepath = os.path.join('static/uploads', filename)
+        image.save(filepath)
+        post.image_url = 'uploads/' + filename
+
+    db.session.commit()
+    return redirect(url_for('post', slug=post.slug))
 
 @app.route('/blogger/<string:id>')
 def blogger(id):
@@ -412,13 +466,14 @@ def get_messages():
     messages = Message.query.order_by(Message.timestamp.asc()).all()
     result = []
     for msg in messages:
-        if msg.user:
-            result.append({
-                'user_name' :  msg.user.name,
-                'content': msg.content,
-                "image" : msg.user.avatar_url,
-                'timestamp': msg.timestamp.strftime('%Y-%m-%d %H:%M:%S')
-            })
+        print(msg.user.id , msg.user.name)
+        result.append({
+            'user_name' : msg.user.name,
+            'id' : msg.user.id,
+            'content': msg.content,
+            "image" : msg.user.avatar_url,
+            'timestamp': msg.timestamp.strftime('%Y-%m-%d %H:%M:%S')
+        })
     return jsonify(result)
 
 @app.errorhandler(404)
@@ -429,6 +484,6 @@ if __name__ == '__main__':
         if not path.exists('blog.db'):
             db.create_all()
             print("Database Created")
-    port = int(os.environ.get("PORT", 5000)) 
+    socketio.run(app, debug=True)
     scheduler.add_job(id='Cleanup posts', func=hard_delete_old_posts, trigger='interval', days=1)
     socketio.run(app, debug=True, host='0.0.0.0', port=port)

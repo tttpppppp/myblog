@@ -37,8 +37,8 @@
                         🕒 Lịch sử xem</a>
                 </li>
                 <li>
-                    <a href="#" class="flex items-center p-2 text-gray-600 hover:bg-gray-100 rounded-md">
-                        ⚙️ Đăng xuất</a>
+                    <button type="button" id="dangxuat"  class="flex items-center p-2 text-gray-600 hover:bg-gray-100 rounded-md w-full">
+                        ⚙️ Đăng xuất</button>
                 </li>
             </ul>
         </aside>
@@ -83,54 +83,40 @@
 
         <aside class="md:col-span-3 bg-white shadow-md p-6 rounded-lg sticky-sidebar">
             <div class="mb-6">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                <h3 class="text-lg font-semibold text-gray-800">
                     Bài Viết Nổi Bật
                 </h3>
                 <ul class="space-y-3">
-                    <li>
-                        <a
-                                href="#"
-                                class="text-blue-700 hover:text-blue-800 hover:underline transition duration-200"
-                        >Top 10 Món Ăn Ngon Nhất 2025</a>
-                    </li>
-                    <li>
-                        <a
-                                href="#"
-                                class="text-blue-700 hover:text-blue-800 hover:underline transition duration-200"
-                        >Cách Học Lập Trình Hiệu Quả</a>
-                    </li>
-                    <li>
-                        <a
-                                href="#"
-                                class="text-blue-700 hover:text-blue-800 hover:underline transition duration-200"
-                        >Du Lịch Đà Lạt Mùa Hoa Mai</a>
-                    </li>
+                    {% for i in postsView %}
+                        <li>
+                            <a
+                                    href="/baiviet/{{ i.slug }}"
+                                    class="text-blue-700 hover:text-blue-800 hover:underline transition duration-200 text-sm"
+                            >{{ i.title }}</a>
+                        </li>
+                    {% endfor %}
                 </ul>
             </div>
             <div>
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                <h3 class="text-lg font-semibold text-gray-800">
                     Bài Viết Mới Nhất
                 </h3>
                 <ul class="space-y-3">
-                    <li>
-                        <a
-                                href="#"
-                                class="text-blue-700 hover:text-blue-800 hover:underline transition duration-200"
-                        >Khám Phá Công Nghệ AI Mới</a>
-                    </li>
-                    <li>
-                        <a
-                                href="#"
-                                class="text-blue-700 hover:text-blue-800 hover:underline transition duration-200"
-                        >Bí Quyết Làm Việc Từ Xa</a>
-                    </li>
+                    {% for i in posts[:3] %}
+                        <li>
+                            <a
+                                    href="/baiviet/{{ i.slug }}"
+                                    class="text-blue-700 hover:text-blue-800 hover:underline transition duration-200 text-sm"
+                            >{{ i.title }}</a>
+                        </li>
+                    {% endfor %}
                 </ul>
             </div>
             <div class="mt-6">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                <h3 class="text-lg font-semibold text-gray-800">
                     Thời tiết hôm nay
                 </h3>
-                <div class="weather-widget mt-4 text-center">
+                <div class="weather-widget mt-1 text-center">
                     <p class="text-sm" id="weather-info">Đang tải...</p>
                 </div>
             </div>
@@ -150,8 +136,16 @@
                 </button>
             </div>
             <div id="chat-messages" class="flex-1 p-4 overflow-y-auto space-y-4 bg-gray-50 max-h-[calc(100%-120px)]"></div>
-            <form id="chat-form" class="p-4 border-t border-gray-200 bg-white">
-                <div class="flex space-x-2">
+            <form id="chat-form" class="p-4 border-t border-gray-200 bg-white rounded-lg">
+                <div class="flex space-x-2 relative">
+                    <button
+                            type="button"
+                            id="emoji-toggle"
+                            class="p-2 text-gray-600 hover:text-blue-600"
+                            aria-label="Mở bảng chọn emoji"
+                    >
+                        <i class="fas fa-smile"></i> <!-- Icon mặt cười từ Font Awesome -->
+                    </button>
                     <input
                             type="text"
                             id="chat-input"
@@ -164,16 +158,41 @@
                             class="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition duration-200"
                             aria-label="Gửi tin nhắn"
                     >
-                       Gửi
+                        Gửi
                     </button>
+                    <!-- Container cho emoji picker -->
+                    <div id="emoji-picker-container" class="absolute hidden z-10 top-[-400px] left-0">
+                        <emoji-picker></emoji-picker>
+                    </div>
                 </div>
             </form>
         </div>
     </main>
 
-    <!-- JavaScript for Chat -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/socket.io@4.7.5/client-dist/socket.io.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/socket.io@4.7.5/client-dist/socket.io.min.js"></script>
+    <script>
+        // Lấy các phần tử
+        const emojiToggle = document.getElementById('emoji-toggle');
+        const emojiPickerContainer = document.getElementById('emoji-picker-container');
+        const chatInput = document.getElementById('chat-input');
+
+        // Hiển thị/ẩn emoji picker
+        emojiToggle.addEventListener('click', () => {
+            emojiPickerContainer.classList.toggle('hidden');
+        });
+
+        // Xử lý khi chọn emoji
+        const picker = document.querySelector('emoji-picker');
+        picker.addEventListener('emoji-click', (event) => {
+            chatInput.value += event.detail.unicode; // Chèn emoji vào ô input
+            emojiPickerContainer.classList.add('hidden'); // Ẩn picker sau khi chọn
+            chatInput.focus(); // Đưa con trỏ về ô input
+        });
+
+        // Ẩn picker khi nhấp ra ngoài
+        document.addEventListener('click', (event) => {
+            if (!emojiPickerContainer.contains(event.target) && !emojiToggle.contains(event.target)) {
+                emojiPickerContainer.classList.add('hidden');
+            }
+        });
+    </script>
 {% endblock %}
